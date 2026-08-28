@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MatchDrop">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<title>MatchDrop</title>
+<style>
+  :root {
+    --bg: #0b0c0e; --panel: #121317; --ivory: #f2efe6; --ivory-2: #c9c6ba;
+    --muted: #8a877c; --line: rgba(242,239,230,0.09); --gold: #c9a26b; --gold-bright: #dab77f;
+    --serif: "New York", ui-serif, Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ivory);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .card { max-width: 430px; width: 100%; text-align: center; }
+  .mark { font-family: var(--serif); font-size: 34px; font-weight: 600; margin-bottom: 6px; }
+  .mark em { font-style: normal; color: var(--gold); }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 34px; }
+  a.go {
+    display: block; background: var(--gold); color: #14130f; text-decoration: none;
+    font-size: 19px; font-weight: 700; border-radius: 999px; padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  a.go:active { background: var(--gold-bright); }
+  .addr { color: var(--muted); font-size: 13px; margin-bottom: 30px; }
+  .help {
+    text-align: left; border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
+    padding: 18px 20px; color: var(--ivory-2); font-size: 14.5px; line-height: 1.7; display: none;
+  }
+  .help b { color: var(--ivory); }
+  .stale { color: var(--gold-bright); font-size: 13px; margin-bottom: 16px; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="mark">Match<em>Drop</em></div>
+  <div class="sub" id="sub">Finding your Mac…</div>
+  <div class="stale" id="stale"></div>
+  <a class="go" id="go" style="display:none">Open MatchDrop</a>
+  <div class="addr" id="addr"></div>
+  <div class="help" id="help">
+    If it doesn't open when you tap the button:<br>
+    <b>1.</b> Make sure this phone is on the <b>same Wi-Fi</b> as the Mac (or the Mac is on this phone's hotspot).<br>
+    <b>2.</b> Make sure <b>MatchDrop is open</b> on the Mac.<br>
+    <b>3.</b> If your phone asks to find <b>devices on your local network</b>, tap <b>Allow</b>.<br>
+    Then come back here and tap the button again.
+  </div>
+</div>
+<script>
+async function load() {
+  try {
+    const r = await fetch("candidates.json?ts=" + Date.now(), { cache: "no-store" });
+    const c = await r.json();
+    if (!c.ip) throw new Error("no address yet");
+    const url = `http://${c.ip}:${c.port || 8787}`;
+    const go = document.getElementById("go");
+    go.href = url;
+    go.style.display = "block";
+    document.getElementById("addr").textContent = url.replace("http://", "");
+    document.getElementById("sub").textContent = "Your Mac's dashboard is one tap away.";
+    document.getElementById("help").style.display = "block";
+    const age = Date.now() / 1000 - (c.updated || 0);
+    const stale = document.getElementById("stale");
+    if (age > 6 * 3600) {
+      stale.style.display = "block";
+      stale.textContent = "The Mac hasn't checked in for a while — open MatchDrop on the Mac first.";
+    } else { stale.style.display = "none"; }
+  } catch (e) {
+    document.getElementById("sub").textContent = "Open MatchDrop on the Mac first, then pull to refresh here.";
+    document.getElementById("help").style.display = "block";
+  }
+}
+load();
+setInterval(load, 20000);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "MatchDrop",
+  "short_name": "MatchDrop",
+  "display": "standalone",
+  "background_color": "#0b0c0e",
+  "theme_color": "#0b0c0e",
+  "start_url": ".",
+  "icons": [{ "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }]
+}
